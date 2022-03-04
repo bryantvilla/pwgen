@@ -1,0 +1,82 @@
+#!/usr/bin/env python
+
+import random
+import argparse
+import string
+
+def argp():
+    parser = argparse.ArgumentParser(description="Generate a secure, memorable password using the XKCD method")
+    parser.add_argument('-w','--words', type=int, help='include words in the password (default=4)')
+    parser.add_argument('-c','--caps', type=int, help='capitalize the first letter of random words (default=0)')
+    parser.add_argument('-n','--numbers', type=int, help='insert random numbers in the password (default=0)')
+    parser.add_argument('-s','--symbols', type=int, help='insert random symbols in the password (default=0)')
+    args = parser.parse_args()
+    
+    # default values
+    if args.words:
+        wordCount = args.words
+    else:
+        wordCount = 4
+
+    if args.caps: 
+        capCount = args.caps
+    else:
+        capCount = 0
+
+    if args.numbers:
+        numCount = args.numbers
+    else:
+        numCount = 0
+
+    if args.symbols:
+        symCount = args.symbols
+    else:
+        symCount = 0
+    
+
+    password = gen_pass(wordCount,capCount,symCount,numCount)
+
+    return password
+
+# function to open and read word file (wordNum, capNum, specialNum, numOfNums)
+def gen_pass(w,c,s,n):
+
+    words = ""
+    #special characters
+    sym = list(string.punctuation)
+     
+    while True:
+        
+        #selects to randomly capitalize, add number, or add special character depending on user input
+        randChoice = random.randrange(1,4)
+        #if selected, capitalizes first letter of parsed word
+        if c != 0 and randChoice == 1 and w != 0:
+            words += random.choice(list(open('./words.txt'))).strip().capitalize()
+            c -= 1
+            w -= 1
+
+        #inputs special characted into password
+        if s != 0 and randChoice == 2:
+            r = random.randrange(len(sym) -1)
+            words += sym[r]
+            s -= 1
+
+        #inputs number into password
+        if n != 0 and randChoice == 3:
+            r = random.randrange(9)
+            words += str(r)
+            n -= 1
+        
+        # parses new word if there are no more capital words left
+        elif c == 0 and randChoice == 1 and w != 0:
+            words += random.choice(list(open('./words.txt'))).strip()
+            w -= 1
+
+        #checks to see if all inputs have been used 
+        if w == 0 and s == 0 and n == 0 and c == 0:
+            break
+
+    return words
+
+if __name__ == '__main__':
+    print(argp())
